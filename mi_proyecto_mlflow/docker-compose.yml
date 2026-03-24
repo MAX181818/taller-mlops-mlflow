@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  # 1. Base de datos para la metadata de MLflow
+  db_mlflow:
+    image: postgres:14
+    container_name: db_mlflow
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER_MLFLOW}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_MLFLOW}
+      POSTGRES_DB: ${POSTGRES_DB_MLFLOW}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_mlflow_data:/var/lib/postgresql/data
+
+  # 2. Base de datos para los Datos
+  db_data:
+    image: postgres:14
+    container_name: db_data
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER_DATA}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_DATA}
+      POSTGRES_DB: ${POSTGRES_DB_DATA}
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_data_storage:/var/lib/postgresql/data
+
+  # 3. MinIO para los artefactos de MLflow
+  minio:
+    image: minio/minio
+    container_name: minio
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  # 4. Servicio que crea el bucket en MinIO automáticamente
+  createbuckets:
+    image: minio/mc
+    container_name: createbuckets
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc alias set myminio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      mc mb myminio/mlflow;
+      exit 0;
+      "
+
+  # 5. Servidor de MLflow
+  mlflow:
+    build: ./mlflow
+    container_name: mlflow_server
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+    depends_on:
+      - db_mlflow
+      - minio
+    command: >
+      mlflow server
+      --backend-store-uri postgresql://${POSTGRES_USER_MLFLOW}:${POSTGRES_PASSWORD_MLFLOW}@db_mlflow:5432/${POSTGRES_DB_MLFLOW}
+      --default-artifact-root s3://mlflow/
+      --host 0.0.0.0
+
+  # 6. JupyterLab (¡NUEVO!)
+  jupyter:
+    build: ./jupyter
+    container_name: jupyter_lab
+    restart: always
+    ports:
+      - "8888:8888"
+    environment:
+      # Conexión directa a MLflow y MinIO
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+      # Credenciales para la base de datos de los datos (db_data)
+      - DB_DATA_USER=${POSTGRES_USER_DATA}
+      - DB_DATA_PASS=${POSTGRES_PASSWORD_DATA}
+      - DB_DATA_NAME=${POSTGRES_DB_DATA}
+    volumes:
+      - ./notebooks:/workspace  # Mapea tu carpeta local "notebooks"
+    depends_on:
+      - mlflow
+      - db_data
+
+  # 7. API de Inferencia (FastAPI)
+  api:
+    build: ./api
+    container_name: api_inferencia
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+    depends_on:
+      - mlflow
+
+
+volumes:
+  db_mlflow_data:
+  db_data_storage:
+  minio_data:

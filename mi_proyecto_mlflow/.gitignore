@@ -1,0 +1,11 @@
+# Variables de entorno
+.env
+
+# Caché de Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Datos locales (si llegas a tener carpetas pesadas)
+data/
+
