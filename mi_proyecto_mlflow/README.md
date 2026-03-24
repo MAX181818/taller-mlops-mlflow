@@ -4,7 +4,7 @@ Este proyecto es una implementación completa de un ecosistema de Machine Learni
 
 ---
 
-## 🏗️ Arquitectura y Flujo del Proceso
+## Arquitectura y Flujo del Proceso
 
 El proyecto está diseñado bajo una arquitectura de microservicios. A continuación se presenta el diagrama general del flujo de trabajo:
 
@@ -21,7 +21,7 @@ El proyecto está diseñado bajo una arquitectura de microservicios. A continuac
 
 ---
 
-## 🛠️ Requisitos Previos
+##  Requisitos Previos
 
 Para ejecutar este taller, necesitas tener instalado en tu máquina:
 * Docker y Docker Compose.
@@ -52,6 +52,7 @@ Abre una terminal en la raíz del proyecto y ejecuta el siguiente comando para c
 Bash
 docker compose up -d --build
 Nota: La primera vez puede tardar unos minutos mientras descarga y construye las imágenes de Python, MLflow, Jupyter y FastAPI.
+> ![Ejecucion](image/ejecucion.png)
 
 ### Paso 3: Entrenamiento y Experimentación
 Una vez que los contenedores estén corriendo, ingresa a JupyterLab a través de tu navegador en:
@@ -62,12 +63,15 @@ Allí encontrarás el notebook entrenamiento.ipynb. Al ejecutar sus celdas, ocur
 Se generarán datos crudos y procesados que se guardarán directamente en la base de datos PostgreSQL (db_data).
 
 Se iniciará un ciclo de 20 experimentos utilizando un modelo RandomForestClassifier, variando sus hiperparámetros aleatoriamente en cada ejecución.
+> ![Entrenamiento](image/Entrenamiento.png)
 
 ### Paso 4: Monitoreo en MLflow
 Para ver el registro de todas las ejecuciones, métricas obtenidas y el modelo final registrado, ingresa al servidor de MLflow en:
  http://localhost:5000
 
 En la sección de experimentos, verás las 20 iteraciones, lo que permite comparar rápidamente cuál combinación de hiperparámetros arrojó la mejor precisión (accuracy). El modelo queda guardado bajo el nombre Modelo_Taller_RF.
+> ![Mlflow](image/mlflow.png)
+
 
 ### Paso 5: Despliegue e Inferencia (FastAPI)
 La API ya se encuentra corriendo en el puerto 8000. FastAPI se encargó de descargar la última versión del modelo desde MLflow automáticamente al iniciar.
@@ -76,9 +80,13 @@ Para probar la inferencia, accede a la documentación interactiva de Swagger:
  http://localhost:8000/docs
 
 En la ruta /predict, puedes enviar un JSON con los valores de las 5 features esperadas por el modelo.
+> ![API](image/Api.png)
+
 
 Al presionar "Execute", la API procesará los datos a través del modelo Random Forest descargado y devolverá la predicción (ej. {"prediccion": 1}).
 
+> ![Respuesta API](image/respuesta_api.png)
+> 
 ###  Limpieza del Entorno
 Si deseas apagar la infraestructura y eliminar los contenedores y redes creadas, ejecuta en tu terminal:
 
