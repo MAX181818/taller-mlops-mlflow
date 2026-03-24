@@ -65,6 +65,8 @@ Se generarán datos crudos y procesados que se guardarán directamente en la bas
 Se iniciará un ciclo de 20 experimentos utilizando un modelo RandomForestClassifier, variando sus hiperparámetros aleatoriamente en cada ejecución.
 > ![Entrenamiento](image/Entrenamiento.png)
 
+> ![Resultado Entrenamiento](image/resultado_entrenamiento.png)
+
 ### Paso 4: Monitoreo en MLflow
 Para ver el registro de todas las ejecuciones, métricas obtenidas y el modelo final registrado, ingresa al servidor de MLflow en:
  http://localhost:5000
