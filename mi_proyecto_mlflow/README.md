@@ -46,16 +46,16 @@ POSTGRES_USER_DATA=data_user
 POSTGRES_PASSWORD_DATA=data_pass
 POSTGRES_DB_DATA=data_db
 ```
-Paso 2: Levantar la Infraestructura
+### Paso 2: Levantar la Infraestructura
 Abre una terminal en la raíz del proyecto y ejecuta el siguiente comando para construir y encender todos los contenedores en segundo plano:
 
 Bash
 docker compose up -d --build
 Nota: La primera vez puede tardar unos minutos mientras descarga y construye las imágenes de Python, MLflow, Jupyter y FastAPI.
 
-Paso 3: Entrenamiento y Experimentación
+### Paso 3: Entrenamiento y Experimentación
 Una vez que los contenedores estén corriendo, ingresa a JupyterLab a través de tu navegador en:
-🔗 http://localhost:8888
+ http://localhost:8888
 
 Allí encontrarás el notebook entrenamiento.ipynb. Al ejecutar sus celdas, ocurrirá lo siguiente:
 
@@ -63,23 +63,23 @@ Se generarán datos crudos y procesados que se guardarán directamente en la bas
 
 Se iniciará un ciclo de 20 experimentos utilizando un modelo RandomForestClassifier, variando sus hiperparámetros aleatoriamente en cada ejecución.
 
-Paso 4: Monitoreo en MLflow
+### Paso 4: Monitoreo en MLflow
 Para ver el registro de todas las ejecuciones, métricas obtenidas y el modelo final registrado, ingresa al servidor de MLflow en:
-🔗 http://localhost:5000
+ http://localhost:5000
 
 En la sección de experimentos, verás las 20 iteraciones, lo que permite comparar rápidamente cuál combinación de hiperparámetros arrojó la mejor precisión (accuracy). El modelo queda guardado bajo el nombre Modelo_Taller_RF.
 
-Paso 5: Despliegue e Inferencia (FastAPI)
+### Paso 5: Despliegue e Inferencia (FastAPI)
 La API ya se encuentra corriendo en el puerto 8000. FastAPI se encargó de descargar la última versión del modelo desde MLflow automáticamente al iniciar.
 
 Para probar la inferencia, accede a la documentación interactiva de Swagger:
-🔗 http://localhost:8000/docs
+ http://localhost:8000/docs
 
 En la ruta /predict, puedes enviar un JSON con los valores de las 5 features esperadas por el modelo.
 
 Al presionar "Execute", la API procesará los datos a través del modelo Random Forest descargado y devolverá la predicción (ej. {"prediccion": 1}).
 
-🧹 Limpieza del Entorno
+###  Limpieza del Entorno
 Si deseas apagar la infraestructura y eliminar los contenedores y redes creadas, ejecuta en tu terminal:
 
 Bash
