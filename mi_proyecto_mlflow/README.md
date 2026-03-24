@@ -45,6 +45,7 @@ POSTGRES_DB_MLFLOW=mlflow_db
 POSTGRES_USER_DATA=data_user
 POSTGRES_PASSWORD_DATA=data_pass
 POSTGRES_DB_DATA=data_db
+```
 Paso 2: Levantar la Infraestructura
 Abre una terminal en la raíz del proyecto y ejecuta el siguiente comando para construir y encender todos los contenedores en segundo plano:
 
